@@ -26,6 +26,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation project(path: ':sharelib')
-
+//    implementation project(path: ':sharelib')
+    implementation 'com.github.Dboy233:ShareToMe:1.0'
 }

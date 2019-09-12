@@ -5,7 +5,7 @@
 ## 解析分享到我的应用的信息数据
 ### android.intent.action.SEND 
 
-``xml``
+```xml
     
         <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -17,12 +17,12 @@
          ....
          ....
     
-``xml``
+```
 
 ### 解析的全部类型参考AndroidManifest.xml
 ### Refer to it for all types of parsing AndroidManifest.xml
 
-``java``
+```java
 
     ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.HandleListener() {
 
@@ -42,8 +42,14 @@
             }
         });
 
-``java``
+```
 
+    allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
 
     dependencies {
 	        implementation 'com.github.Dboy233:ShareToMe:1.0'
