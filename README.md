@@ -46,7 +46,7 @@
 
 
     dependencies {
-	        implementation 'com.github.Dboy233:ShareToMe:Tag'
+	        implementation 'com.github.Dboy233:ShareToMe:1.0'
 	}
     
 
