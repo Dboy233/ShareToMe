@@ -42,7 +42,7 @@
                 <data android:mimeType="text/x-vcard" />
             </intent-filter>
         </activity>
-        <activity android:name=".tome.ShareToMeActivity" />
+
     </application>
 
 </manifest>
