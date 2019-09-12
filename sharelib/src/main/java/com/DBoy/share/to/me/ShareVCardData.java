@@ -13,6 +13,23 @@ public class ShareVCardData extends BaseShareData {
         mVCard = VCard;
     }
 
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public VCard getVCard() {
+        return mVCard;
+    }
+
+    public void setVCard(VCard VCard) {
+        mVCard = VCard;
+    }
+
     @Override
     protected String getStrings() {
         return content;
