@@ -15,6 +15,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+<!--share img-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -22,6 +23,7 @@
 
                 <data android:mimeType="image/*" />
             </intent-filter>
+<!--            share text-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -29,13 +31,16 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
+<!--            Not yet completed -->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.SEND_MULTIPLE" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
 
-                <data android:mimeType="image/*" />
-            </intent-filter>
+<!--                <data android:mimeType="image/*" />-->
+<!--            </intent-filter>-->
+
+<!--            share vcard-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
