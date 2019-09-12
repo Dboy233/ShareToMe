@@ -22,6 +22,10 @@
 ### 解析的全部类型参考AndroidManifest.xml
 ### Refer to it for all types of parsing AndroidManifest.xml
 
+
+### 使用很简单
+
+### 在nCreate 或者 onResume 中执行此方法 分享内容的解析结果就会通接口返回
 ```java
 
     ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.HandleListener() {
