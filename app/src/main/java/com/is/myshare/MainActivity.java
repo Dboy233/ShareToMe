@@ -66,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("Dboy", "data =>" + shareData.toString());
 
+                mTextView.setText(shareData.toString());
+
                 BaseShareData.ShareDataType dataType = shareData.getDataType();
 
                 if (BaseShareData.ShareDataType.SHARE_MULTIPLE_IMAGES_DATA == dataType) {
