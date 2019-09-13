@@ -1,5 +1,9 @@
 package com.DBoy.share.to.me;
 
+import androidx.annotation.NonNull;
+
+import static com.DBoy.share.to.me.BaseShareData.ShareDataType.SHARE_IMG_DATA;
+
 public class ShareImageData extends BaseShareData {
 
     private String name;
@@ -27,14 +31,16 @@ public class ShareImageData extends BaseShareData {
         this.path = path;
     }
 
-    @Override
-    protected String getStrings() {
-        return toString();
-    }
 
+    @NonNull
     @Override
     public String toString() {
         return "name='" + name + '\'' +
                 ", path='" + path;
+    }
+
+    @Override
+    public ShareDataType getDataType() {
+        return SHARE_IMG_DATA;
     }
 }

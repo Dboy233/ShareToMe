@@ -1,8 +1,13 @@
 package com.DBoy.share.to.me;
 
+import androidx.annotation.NonNull;
+
 import ezvcard.VCard;
 
+import static com.DBoy.share.to.me.BaseShareData.ShareDataType.SHARE_VCARD_DATA;
+
 public class ShareVCardData extends BaseShareData {
+
     private String content;
 
     private VCard mVCard;
@@ -31,7 +36,15 @@ public class ShareVCardData extends BaseShareData {
     }
 
     @Override
-    protected String getStrings() {
+    public ShareDataType getDataType() {
+        return SHARE_VCARD_DATA;
+    }
+
+
+
+    @NonNull
+    @Override
+    public String toString() {
         return content;
     }
 }

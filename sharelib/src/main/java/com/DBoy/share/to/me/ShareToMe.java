@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import ezvcard.Ezvcard;
@@ -21,40 +23,65 @@ import ezvcard.VCard;
 
 public class ShareToMe {
     //文字分享
-    private final static String TYPE_TEXT = "text/plain";
+    public final static String TYPE_TEXT = "text/plain";
     //图片分享
-    private final static String TYPE_IMG = "image/";
+    public final static String TYPE_IMG = "image/";
     // v card
-    private final static String TYPE_VCARD = "text/x-vcard";
+    public final static String TYPE_VCARD = "text/x-vcard";
 
 
     private static String mType = null;
-    private boolean isNotShare = false;
 
 
     public static void handleShareToMe(Context context, Intent intent, @NonNull HandleListener handleListener) {
-
+        //没有intent数据
         if (intent == null) {
             return;
         }
 
-        if (!Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND)) {
-            return;
-        }
-        if (intent.getType() == null) {
-            handleListener.handleError("类型空");
-            return;
-        }
         mType = intent.getType();
-        handleListener.handleType(mType);
-        if (mType.equals(TYPE_TEXT)) {
-            handleText(intent, handleListener);
-        } else if (mType.startsWith(TYPE_IMG)) {
-            handleImage(context, intent, handleListener);
-        } else if (mType.equals(TYPE_VCARD)) {
-            handleVCard(context, intent, handleListener);
+
+        if (mType == null) {
+            return;
         }
 
+        handleListener.handleType(mType);
+
+        //判断分享类型
+        if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND)) {
+            if (mType.equals(TYPE_TEXT)) {
+                handleText(intent, handleListener);
+            } else if (mType.startsWith(TYPE_IMG)) {
+                handleImage(context, intent, handleListener);
+            } else if (mType.equals(TYPE_VCARD)) {
+                handleVCard(context, intent, handleListener);
+            }
+        } else if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND_MULTIPLE)) {
+            if (mType.startsWith(TYPE_IMG)) {
+                handleMultipleImages(context, intent, handleListener);
+            }
+        } else {
+            //有待补充其他类型的分享
+        }
+
+    }
+
+    private static void handleMultipleImages(Context context, Intent intent, HandleListener handleListener) {
+        ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+        if (imageUris == null || imageUris.size() == 0) {
+            handleListener.handleError("没有获取分享图片列表");
+            return;
+        }
+
+        List<ShareImageData> shareImageData = new ArrayList<>();
+
+        for (Uri uris : imageUris) {
+            String[] realFilePath = getRealFilePath(context, uris);
+            String imgName = Objects.requireNonNull(realFilePath)[0];
+            String imgPath = Objects.requireNonNull(realFilePath)[1];
+            shareImageData.add(new ShareImageData(imgName, imgPath));
+        }
+        handleListener.handleContent(new ShareMultipleImagesData(shareImageData));
     }
 
     /**
@@ -74,8 +101,8 @@ public class ShareToMe {
             }
 
             byte[] vcardBt;
-            String vcardString="null";
-            VCard vCard=null;
+            String vcardString = "null";
+            VCard vCard = null;
             try (InputStream stream = context.getContentResolver().openInputStream(uri)) {
 
                 if (stream == null) {
@@ -98,7 +125,7 @@ public class ShareToMe {
                 return;
             }
 
-            handleListener.handleContent(new ShareVCardData(vcardString,vCard));
+            handleListener.handleContent(new ShareVCardData(vcardString, vCard));
 
         }
     }
@@ -108,11 +135,8 @@ public class ShareToMe {
      */
     private static void handleImage(Context context, Intent intent, HandleListener handleListener) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        String path = getRealFilePath(context, imageUri);
-        if (path == null) {
-            path = imageUri.getPath();
-        }
-        handleListener.handleContent(new ShareImageData("img", path));
+        String[] imgData = getRealFilePath(context, imageUri);
+        handleListener.handleContent(new ShareImageData(Objects.requireNonNull(imgData)[0], Objects.requireNonNull(imgData)[1]));
     }
 
     /**
@@ -133,27 +157,38 @@ public class ShareToMe {
     /**
      * 获取文件的绝对路径
      */
-    public static String getRealFilePath(final Context context, final Uri uri) {
+    private static String[] getRealFilePath(final Context context, final Uri uri) {
         if (null == uri) return null;
         final String scheme = uri.getScheme();
-        String data = null;
+        String name = null;
+        String imgPath = null;
         if (scheme == null)
-            data = uri.getPath();
+            imgPath = uri.getPath();
         else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            data = uri.getPath();
+            imgPath = uri.getPath();
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
             Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.ImageColumns.DATA}, null, null, null);
             if (null != cursor) {
                 if (cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
                     if (index > -1) {
-                        data = cursor.getString(index);
+                        imgPath = cursor.getString(index);
                     }
                 }
                 cursor.close();
             }
         }
-        return data;
+        if (imgPath == null) {
+            imgPath = uri.getPath();
+        }
+
+        int lastPoint = Objects.requireNonNull(imgPath).lastIndexOf(".");
+        int startName = Objects.requireNonNull(imgPath).lastIndexOf("/");
+        name = imgPath.substring(startName+1, lastPoint);
+
+        String[] imgData = {name, imgPath};
+
+        return imgData;
     }
 
     public interface HandleListener {
