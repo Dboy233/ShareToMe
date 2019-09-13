@@ -56,7 +56,7 @@
 	}
 
     dependencies {
-	        implementation 'com.github.Dboy233:ShareToMe:1.1'
+	        implementation 'com.github.Dboy233:ShareToMe:2.0'
 	}
     
 
