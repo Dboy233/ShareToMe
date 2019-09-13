@@ -36,7 +36,7 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-<!--            Not yet completed -->
+<!--            share imgs -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
 
