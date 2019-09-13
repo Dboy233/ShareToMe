@@ -22,9 +22,9 @@ import ezvcard.Ezvcard;
 import ezvcard.VCard;
 
 public class ShareToMe {
-    //文字分享
+    //文字分享 Text sharing
     public final static String TYPE_TEXT = "text/plain";
-    //图片分享
+    //图片分享 Picture sharing
     public final static String TYPE_IMG = "image/";
     // v card
     public final static String TYPE_VCARD = "text/x-vcard";
@@ -35,12 +35,14 @@ public class ShareToMe {
 
     public static void handleShareToMe(Context context, Intent intent, @NonNull HandleListener handleListener) {
         //没有intent数据
+        //No intent data
         if (intent == null) {
             return;
         }
 
         mType = intent.getType();
-
+        //没有数据类型
+        //No data type
         if (mType == null) {
             return;
         }
@@ -48,6 +50,7 @@ public class ShareToMe {
         handleListener.handleType(mType);
 
         //判断分享类型
+        //Judging the type of sharing
         if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND)) {
             if (mType.equals(TYPE_TEXT)) {
                 handleText(intent, handleListener);
@@ -62,10 +65,15 @@ public class ShareToMe {
             }
         } else {
             //有待补充其他类型的分享
+            //Other types of sharing to be added
         }
 
     }
 
+    /**
+     * 处理多组图片
+     * Processing multiple sets of pictures
+     */
     private static void handleMultipleImages(Context context, Intent intent, HandleListener handleListener) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
         if (imageUris == null || imageUris.size() == 0) {
@@ -86,6 +94,7 @@ public class ShareToMe {
 
     /**
      * 处理通讯录
+     * Handling Address Book vcard
      */
     private static void handleVCard(Context context, Intent intent, HandleListener handleListener) {
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
@@ -132,6 +141,7 @@ public class ShareToMe {
 
     /**
      * 处理图片 得到路径
+     * Processing Pictures to Get Paths
      */
     private static void handleImage(Context context, Intent intent, HandleListener handleListener) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -141,6 +151,7 @@ public class ShareToMe {
 
     /**
      * 处理文字
+     * Processing text
      */
     private static void handleText(Intent intent, HandleListener handleListener) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -155,7 +166,8 @@ public class ShareToMe {
     }
 
     /**
-     * 获取文件的绝对路径
+     * 获取Img的绝对路径和名字
+     * Get the absolute path and name of Img
      */
     private static String[] getRealFilePath(final Context context, final Uri uri) {
         if (null == uri) return null;
@@ -184,7 +196,7 @@ public class ShareToMe {
 
         int lastPoint = Objects.requireNonNull(imgPath).lastIndexOf(".");
         int startName = Objects.requireNonNull(imgPath).lastIndexOf("/");
-        name = imgPath.substring(startName+1, lastPoint);
+        name = imgPath.substring(startName + 1, lastPoint);
 
         String[] imgData = {name, imgPath};
 
@@ -192,10 +204,21 @@ public class ShareToMe {
     }
 
     public interface HandleListener {
+        /**
+         * @param type 原始分享类型 image/* ,text/plain ,text/x-vcard
+         *             Original Sharing Type image/* ,text/plain ,text/x-vcard
+         */
         void handleType(String type);
 
+        /**
+         * @param shareData 处理分享数据的实体基类
+         *                  Entity base classes for processing shared data
+         */
         void handleContent(BaseShareData shareData);
 
+        /**
+         * @param e error
+         */
         void handleError(String e);
     }
 
