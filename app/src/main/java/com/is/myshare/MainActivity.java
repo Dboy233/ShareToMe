@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.DBoy.share.to.me.BaseShareData;
 import com.DBoy.share.to.me.ShareImageData;
 import com.DBoy.share.to.me.ShareMultipleImagesData;
+import com.DBoy.share.to.me.ShareTextData;
 import com.DBoy.share.to.me.ShareToMe;
+import com.DBoy.share.to.me.ShareVCardData;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -68,16 +70,24 @@ public class MainActivity extends AppCompatActivity {
 
                 mTextView.setText(shareData.toString());
 
-                BaseShareData.ShareDataType dataType = shareData.getDataType();
+                if (shareData.isMultipleImagesData()) {
 
-                if (BaseShareData.ShareDataType.SHARE_MULTIPLE_IMAGES_DATA == dataType) {
-                    ShareMultipleImagesData shareMultipleImagesData = (ShareMultipleImagesData) shareData;
+                    ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
                     mBaseQuickAdapter.addData(shareMultipleImagesData.getImgPath());
-                } else if (BaseShareData.ShareDataType.SHARE_IMG_DATA == dataType) {
-                    ShareImageData shareImageData = (ShareImageData) shareData;
+
+                } else if (shareData.isImageData()) {
+
+                    ShareImageData shareImageData = shareData.getImageData();
                     viewById.setVisibility(View.VISIBLE);
                     String path = shareImageData.getPath();
                     Glide.with(getApplicationContext()).load(path).into(viewById);
+
+                } else if (shareData.isTextData()){
+                    ShareTextData textData = shareData.getTextData();
+
+                } else if (shareData.isVCardData()) {
+                    ShareVCardData vCardData = shareData.getVCardData();
+
                 }
 
             }
