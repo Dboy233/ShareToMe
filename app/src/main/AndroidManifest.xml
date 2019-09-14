@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.is.myshare">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
 
     <application
@@ -20,7 +20,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-<!--share img-->
+            <!--share img-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -28,7 +28,7 @@
 
                 <data android:mimeType="image/*" />
             </intent-filter>
-<!--            share text-->
+            <!-- share text-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -36,7 +36,7 @@
 
                 <data android:mimeType="text/plain" />
             </intent-filter>
-<!--            share imgs -->
+            <!--share imgs -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
 
@@ -45,7 +45,7 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
 
-<!--            share vcard-->
+            <!--  share vcard-->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
