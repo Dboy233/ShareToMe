@@ -12,12 +12,23 @@ public class ShareVCardData extends BaseShareData {
 
     private VCard mVCard;
 
+    private byte[] vCardBt;
 
-    public ShareVCardData(String content, VCard VCard) {
+
+    public ShareVCardData(String content, VCard VCard, byte[] vCardBt) {
         this.content = content;
         mVCard = VCard;
+        this.vCardBt = vCardBt;
     }
 
+
+    public byte[] getvCardBt() {
+        return vCardBt;
+    }
+
+    public void setvCardBt(byte[] vCardBt) {
+        this.vCardBt = vCardBt;
+    }
 
     public String getContent() {
         return content;

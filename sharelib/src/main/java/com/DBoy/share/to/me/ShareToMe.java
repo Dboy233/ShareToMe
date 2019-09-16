@@ -109,7 +109,7 @@ public class ShareToMe {
                 return;
             }
 
-            byte[] vcardBt;
+            byte[] vcardBt=null;
             String vcardString = "null";
             VCard vCard = null;
             try (InputStream stream = context.getContentResolver().openInputStream(uri)) {
@@ -134,7 +134,7 @@ public class ShareToMe {
                 return;
             }
 
-            handleListener.handleContent(new ShareVCardData(vcardString, vCard));
+            handleListener.handleContent(new ShareVCardData(vcardString, vCard,vcardBt));
 
         }
     }
