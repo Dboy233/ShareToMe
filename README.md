@@ -2,7 +2,7 @@
 
 # Parsing the information data shared with my application
 
-## 解析分享到我的应用的信息数据
+## 解析分享到我的应用的信息数据 支持 图片 多组图片 明信片 文字
 ### android.intent.action.SEND 
 
 ```xml
