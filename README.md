@@ -37,7 +37,28 @@
 
             @Override
             public void handleContent(BaseShareData shareData) {
-                Log.d("Dboy", "data =>" + shareData.toString());
+	    
+                if (shareData.isMultipleImagesData()) {
+		
+                    ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
+                    mBaseQuickAdapter.addData(shareMultipleImagesData.getImgPath());
+		    
+                } else if (shareData.isImageData()) {
+		
+                    ShareImageData shareImageData = shareData.getImageData();
+                    viewById.setVisibility(View.VISIBLE);
+                    String path = shareImageData.getPath();
+                    Glide.with(getApplicationContext()).load(path).into(viewById);
+
+                } else if (shareData.isTextData()){
+		
+                    ShareTextData textData = shareData.getTextData();
+
+                } else if (shareData.isVCardData()) {
+		
+                    ShareVCardData vCardData = shareData.getVCardData();
+
+                }
             }
 
             @Override
