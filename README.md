@@ -80,7 +80,3 @@
 	        implementation 'com.github.Dboy233:ShareToMe:3.0'
 	}
     
-
-#  Are there any partners willing to work together to complete the project?
-# 有没有愿意一起完成此项目的合作者。
-## mailbox 894230813@qq.com
