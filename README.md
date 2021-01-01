@@ -27,45 +27,47 @@
 
 ### 在nCreate 或者 onResume 中执行此方法 分享内容的解析结果就会通接口返回
 ```java
-
-    ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.HandleListener() {
-
+ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.ShareCallBack() {
+            /**
+             *
+             * @param type  Original Sharing Type image/* ,text/plain ,text/x-vcard<p/>
+             */
             @Override
-            public void handleType(String type) {
+            public void callType(String type) {
                 Log.d("Dboy", "type =>" + type);
             }
 
+            /**
+             * @param shareData 处理分享数据的实体基类
+             */
             @Override
-            public void handleContent(BaseShareData shareData) {
-	    
-                if (shareData.isMultipleImagesData()) {
-		
-                    ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
-                    mBaseQuickAdapter.addData(shareMultipleImagesData.getImgPath());
-		    
-                } else if (shareData.isImageData()) {
-		
-                    ShareImageData shareImageData = shareData.getImageData();
-                    viewById.setVisibility(View.VISIBLE);
-                    String path = shareImageData.getPath();
-                    Glide.with(getApplicationContext()).load(path).into(viewById);
-
-                } else if (shareData.isTextData()){
-		
-                    ShareTextData textData = shareData.getTextData();
-
-                } else if (shareData.isVCardData()) {
-		
-                    ShareVCardData vCardData = shareData.getVCardData();
-
+            public void onSuccess(BaseShareData shareData) {
+                switch (shareData.getDataType()) {
+                    case SHARE_IMG_DATA:
+                        //多组图片分享
+                        ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
+                        break;
+                    case SHARE_MULTIPLE_IMAGES_DATA:
+                        //单个图片分享
+                        ShareImageData shareImageData = shareData.getImageData();
+                        break;
+                    case SHARE_TEXT_DATA:
+                        //文本分享
+                        ShareTextData textData = shareData.getTextData();
+                        break;
+                    case SHARE_VCARD_DATA:
+                        //明信片分享
+                        ShareVCardData vCardData = shareData.getVCardData();
+                        break;
                 }
             }
 
+
             @Override
-            public void handleError(String e) {
+            public void onError(String e) {
                 Log.d("Dboy", "error =>" + e);
             }
-        });
+        })
 
 ```
 
@@ -77,6 +79,6 @@
 	}
 
     dependencies {
-	        implementation 'com.github.Dboy233:ShareToMe:3.0'
+	        implementation 'com.github.Dboy233:ShareToMe:3.1.0'
 	}
     
