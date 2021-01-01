@@ -2,10 +2,12 @@ package com.is.myshare;
 
 import android.Manifest;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,9 +25,17 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.File;
 
+import ezvcard.VCard;
+import ezvcard.property.StructuredName;
+
+public class MainActivity extends AppCompatActivity {
+    //单个图片分享展示IV
+    ImageView imageView;
+    //分享内容以文本展示View
     TextView mTextView;
+    //展示多组图片分享
     RecyclerView mRecyclerView;
     ImageAdapter mBaseQuickAdapter;
 
@@ -33,8 +43,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new RxPermissions(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE).subscribe();
+        //检查权限
+        new RxPermissions(this).request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE).subscribe();
 
+        imageView = findViewById(R.id.imge_img);
         mTextView = findViewById(R.id.text_title);
         mRecyclerView = findViewById(R.id.img_recycler);
 
@@ -45,18 +57,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 在onResume中处理
+     */
     @Override
     protected void onResume() {
         super.onResume();
-        final ImageView viewById = findViewById(R.id.imge_img);
+        checkHandleShare();
+    }
 
-        ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.HandleListener() {
+    private void checkHandleShare() {
+        ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.ShareCallBack() {
             /**
              *
              * @param type  Original Sharing Type image/* ,text/plain ,text/x-vcard<p/>
              */
             @Override
-            public void handleType(String type) {
+            public void callType(String type) {
                 Log.d("Dboy", "type =>" + type);
             }
 
@@ -64,46 +81,63 @@ public class MainActivity extends AppCompatActivity {
              * @param shareData 处理分享数据的实体基类
              */
             @Override
-            public void handleContent(BaseShareData shareData) {
-
-                Log.d("Dboy", "data =>" + shareData.toString());
-
+            public void onSuccess(BaseShareData shareData) {
                 mTextView.setText(shareData.toString());
-
-                if (shareData.isMultipleImagesData()) {
-
-                    ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
-                    mBaseQuickAdapter.addData(shareMultipleImagesData.getImgPath());
-
-                } else if (shareData.isImageData()) {
-
-                    ShareImageData shareImageData = shareData.getImageData();
-                    viewById.setVisibility(View.VISIBLE);
-                    String path = shareImageData.getPath();
-                    Glide.with(getApplicationContext()).load(path).into(viewById);
-
-                } else if (shareData.isTextData()){
-                    ShareTextData textData = shareData.getTextData();
-
-                } else if (shareData.isVCardData()) {
-                    ShareVCardData vCardData = shareData.getVCardData();
-
+                switch (shareData.getDataType()) {
+                    case SHARE_IMG_DATA:
+                        //多组图片分享
+                        ShareMultipleImagesData shareMultipleImagesData = shareData.getMultipleImagesData();
+                        mBaseQuickAdapter.addData(shareMultipleImagesData.getImgPath());
+                        break;
+                    case SHARE_MULTIPLE_IMAGES_DATA:
+                        //单个图片分享
+                        ShareImageData shareImageData = shareData.getImageData();
+                        imageView.setVisibility(View.VISIBLE);
+                        String path = shareImageData.getPath();
+                        Glide.with(getApplicationContext()).load(path).into(imageView);
+                        break;
+                    case SHARE_TEXT_DATA:
+                        //文本分享
+                        ShareTextData textData = shareData.getTextData();
+                        break;
+                    case SHARE_VCARD_DATA:
+                        //明信片分享
+                        ShareVCardData vCardData = shareData.getVCardData();
+                        VCard vCard = vCardData.getVCard();
+                        String fileName = null;
+                        for (int i = 0; i < vCard.getStructuredNames().size(); i++) {
+                            StructuredName structuredName = vCard.getStructuredNames().get(i);
+                            if (structuredName != null) {
+                                fileName = structuredName.getFamily();
+                                fileName += "_" + structuredName.getGiven();
+                            }
+                        }
+                        if (fileName == null) {
+                            Toast.makeText(MainActivity.this, "给VCard一个名字吧", Toast.LENGTH_LONG).show();
+                            break;
+                        }
+                        File file = vCardData.getFileBuilder()
+                                .setFileName(fileName + ".vcf")
+                                .setPath(Environment.getExternalStorageDirectory().getPath())
+                                .createFile();
+                        Log.d("Dboy", "save to : " + file.getAbsolutePath());
+                        Toast.makeText(MainActivity.this, "save to : " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                        break;
                 }
-
             }
 
-            /**
-             * @param e error
-             */
+
             @Override
-            public void handleError(String e) {
+            public void onError(String e) {
                 Log.d("Dboy", "error =>" + e);
             }
         });
     }
 
-
-    class ImageAdapter extends BaseQuickAdapter<ShareImageData, BaseViewHolder> {
+    /**
+     * 多组图片适配器
+     */
+    static class ImageAdapter extends BaseQuickAdapter<ShareImageData, BaseViewHolder> {
 
         public ImageAdapter(int layoutResId) {
             super(layoutResId);

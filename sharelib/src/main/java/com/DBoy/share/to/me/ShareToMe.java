@@ -1,5 +1,6 @@
 package com.DBoy.share.to.me;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,46 +23,64 @@ import ezvcard.Ezvcard;
 import ezvcard.VCard;
 
 public class ShareToMe {
-    //文字分享 Text sharing
+    /**
+     * 文字分享 Text sharing
+     */
     public final static String TYPE_TEXT = "text/plain";
-    //图片分享 Picture sharing
+    /**
+     * 图片分享 Picture sharing
+     */
     public final static String TYPE_IMG = "image/";
-    // v card
+    /**
+     * VCard 分享
+     */
     public final static String TYPE_VCARD = "text/x-vcard";
 
+    /**
+     * 处理分享给我的数据
+     * @param activity 活动
+     * @param shareCallBack 回调
+     */
+    public static void handleShareToMe(Activity activity, @NonNull ShareCallBack shareCallBack) {
+        handleShareToMe(activity.getApplicationContext(),activity.getIntent(),shareCallBack);
+    }
 
-    private static String mType = null;
-
-
-    public static void handleShareToMe(Context context, Intent intent, @NonNull HandleListener handleListener) {
+    /**
+     * 处理分享给我的数据
+     *
+     * @param context        上下文
+     * @param intent         分享意图
+     * @param shareCallBack 分享处理回调
+     */
+    public static void handleShareToMe(Context context, Intent intent, @NonNull ShareCallBack shareCallBack) {
         //没有intent数据
         //No intent data
         if (intent == null) {
             return;
         }
 
-        mType = intent.getType();
+        String type = intent.getType();
         //没有数据类型
         //No data type
-        if (mType == null) {
+        if (type == null) {
             return;
         }
-
-        handleListener.handleType(mType);
+        //通知得到分享类型
+        shareCallBack.callType(type);
 
         //判断分享类型
         //Judging the type of sharing
         if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND)) {
-            if (mType.equals(TYPE_TEXT)) {
-                handleText(intent, handleListener);
-            } else if (mType.startsWith(TYPE_IMG)) {
-                handleImage(context, intent, handleListener);
-            } else if (mType.equals(TYPE_VCARD)) {
-                handleVCard(context, intent, handleListener);
+            if (type.equals(TYPE_TEXT)) {
+                handleText(intent, shareCallBack);
+            } else if (type.startsWith(TYPE_IMG)) {
+                handleImage(context, intent, shareCallBack);
+            } else if (type.equals(TYPE_VCARD)) {
+                handleVCard(context, intent, shareCallBack);
             }
         } else if (Objects.requireNonNull(intent.getAction()).equals(Intent.ACTION_SEND_MULTIPLE)) {
-            if (mType.startsWith(TYPE_IMG)) {
-                handleMultipleImages(context, intent, handleListener);
+            if (type.startsWith(TYPE_IMG)) {
+                handleMultipleImages(context, intent, shareCallBack);
             }
         } else {
             //有待补充其他类型的分享
@@ -74,10 +93,10 @@ public class ShareToMe {
      * 处理多组图片
      * Processing multiple sets of pictures
      */
-    private static void handleMultipleImages(Context context, Intent intent, HandleListener handleListener) {
+    private static void handleMultipleImages(Context context, Intent intent, ShareCallBack shareCallBack) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
         if (imageUris == null || imageUris.size() == 0) {
-            handleListener.handleError("没有获取分享图片列表");
+            shareCallBack.onError("没有获取分享图片列表");
             return;
         }
 
@@ -85,37 +104,42 @@ public class ShareToMe {
 
         for (Uri uris : imageUris) {
             String[] realFilePath = getRealFilePath(context, uris);
-            String imgName = Objects.requireNonNull(realFilePath)[0];
-            String imgPath = Objects.requireNonNull(realFilePath)[1];
+            if (realFilePath == null || realFilePath[0] == null || realFilePath[1] == null) {
+                shareCallBack.onError("Uri :" + uris.toString() + "parsing failed");
+                continue;
+            }
+            String imgName = realFilePath[0];
+            String imgPath = realFilePath[1];
             shareImageData.add(new ShareImageData(imgName, imgPath));
         }
-        handleListener.handleContent(new ShareMultipleImagesData(shareImageData));
+        shareCallBack.onSuccess(new ShareMultipleImagesData(shareImageData));
     }
 
     /**
      * 处理通讯录
      * Handling Address Book vcard
      */
-    private static void handleVCard(Context context, Intent intent, HandleListener handleListener) {
+    private static void handleVCard(Context context, Intent intent, ShareCallBack shareCallBack) {
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
             Bundle extras = intent.getExtras();
             if (extras == null) {
-                handleListener.handleError("No extras");
+                shareCallBack.onError("Not have EXTRAS");
                 return;
             }
             Uri uri = extras.getParcelable(Intent.EXTRA_STREAM);
             if (uri == null) {
-                handleListener.handleError("No EXTRA_STREAM");
+                shareCallBack.onError("Not have EXTRA_STREAM");
                 return;
             }
 
-            byte[] vcardBt=null;
+            byte[] vcardBt = null;
             String vcardString = "null";
             VCard vCard = null;
             try (InputStream stream = context.getContentResolver().openInputStream(uri)) {
 
                 if (stream == null) {
-                    handleListener.handleError("Can't open stream for " + uri);
+                    shareCallBack.onError("Can't open stream for " + uri);
+                    return;
                 }
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] buffer = new byte[2048];
@@ -127,14 +151,14 @@ public class ShareToMe {
                 vcardString = new String(vcardBt, 0, vcardBt.length, StandardCharsets.UTF_8);
                 vCard = Ezvcard.parse(vcardString).first();
             } catch (IOException ioe) {
-                handleListener.handleError(ioe.getMessage());
+                shareCallBack.onError(ioe.getMessage());
             }
             if (vCard == null) {
-                handleListener.handleError("解析失败");
+                shareCallBack.onError("VCard Parsing failed");
                 return;
             }
 
-            handleListener.handleContent(new ShareVCardData(vcardString, vCard,vcardBt));
+            shareCallBack.onSuccess(new ShareVCardData(vcardString, vCard, vcardBt));
 
         }
     }
@@ -143,26 +167,30 @@ public class ShareToMe {
      * 处理图片 得到路径
      * Processing Pictures to Get Paths
      */
-    private static void handleImage(Context context, Intent intent, HandleListener handleListener) {
+    private static void handleImage(Context context, Intent intent, ShareCallBack shareCallBack) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         String[] imgData = getRealFilePath(context, imageUri);
-        handleListener.handleContent(new ShareImageData(Objects.requireNonNull(imgData)[0], Objects.requireNonNull(imgData)[1]));
+        if (imgData == null||imgData[0]==null||imgData[1]==null) {
+            shareCallBack.onError("Uri :"+imageUri.toString()+" Parsing failed");
+            return;
+        }
+        shareCallBack.onSuccess(new ShareImageData(imgData[0], imgData[1]));
     }
 
     /**
      * 处理文字
      * Processing text
      */
-    private static void handleText(Intent intent, HandleListener handleListener) {
+    private static void handleText(Intent intent, ShareCallBack shareCallBack) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
         String sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
         if (sharedText == null) {
-            sharedText = mType;
+            sharedText = "NULL";
         }
         if (sharedTitle == null) {
-            sharedTitle = mType;
+            sharedTitle = "NULL";
         }
-        handleListener.handleContent(new ShareTextData(sharedTitle, sharedText));
+        shareCallBack.onSuccess(new ShareTextData(sharedTitle, sharedText));
     }
 
     /**
@@ -198,28 +226,28 @@ public class ShareToMe {
         int startName = Objects.requireNonNull(imgPath).lastIndexOf("/");
         name = imgPath.substring(startName + 1, lastPoint);
 
-        String[] imgData = {name, imgPath};
-
-        return imgData;
+        return new String[]{name, imgPath};
     }
 
-    public interface HandleListener {
+
+
+    public interface ShareCallBack {
         /**
          * @param type 原始分享类型 image/* ,text/plain ,text/x-vcard
          *             Original Sharing Type image/* ,text/plain ,text/x-vcard
          */
-        void handleType(String type);
+        void callType(String type);
 
         /**
          * @param shareData 处理分享数据的实体基类
          *                  Entity base classes for processing shared data
          */
-        void handleContent(BaseShareData shareData);
+        void onSuccess(BaseShareData shareData);
 
         /**
          * @param e error
          */
-        void handleError(String e);
+        void onError(String e);
     }
 
 

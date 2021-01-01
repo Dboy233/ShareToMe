@@ -22,24 +22,10 @@ public abstract class BaseShareData {
     public abstract String toString();
 
     /**
-     * @return 判断是否是Image数据
-     */
-    public boolean isImageData() {
-        return getDataType() == ShareDataType.SHARE_IMG_DATA;
-    }
-
-    /**
      * @return 基类自行强制转换数据为 ShareImageData
      */
     public ShareImageData getImageData() {
         return (ShareImageData) this;
-    }
-
-    /**
-     * @return 判断是否是多组图片数据
-     */
-    public boolean isMultipleImagesData() {
-        return getDataType() == ShareDataType.SHARE_MULTIPLE_IMAGES_DATA;
     }
 
     /**
@@ -49,12 +35,6 @@ public abstract class BaseShareData {
         return (ShareMultipleImagesData) this;
     }
 
-    /**
-     * @return 判断是否是文字数据
-     */
-    public boolean isTextData() {
-        return getDataType() == ShareDataType.SHARE_TEXT_DATA;
-    }
 
     /**
      * @return 基类自行强制转换数据为 ShareTextData
@@ -64,23 +44,31 @@ public abstract class BaseShareData {
     }
 
     /**
-     * @return 判断是否是VCard数据
-     */
-    public boolean isVCardData() {
-        return getDataType() == ShareDataType.SHARE_VCARD_DATA;
-    }
-
-    /**
      * @return 基类自行强制转换数据为 ShareVCardData
      */
     public ShareVCardData getVCardData() {
         return (ShareVCardData) this;
     }
 
+    /**
+     * 分享类型枚举
+     */
     public enum ShareDataType {
+        /**
+         * 单图片类型数据{@link ShareImageData}
+         */
         SHARE_IMG_DATA,
+        /**
+         * 多图片类型数据{@link ShareMultipleImagesData}
+         */
         SHARE_MULTIPLE_IMAGES_DATA,
+        /**
+         * 文本类型数据{@link ShareTextData}
+         */
         SHARE_TEXT_DATA,
+        /**
+         * Vcard类型数据{@link ShareVCardData}
+         */
         SHARE_VCARD_DATA
     }
 
