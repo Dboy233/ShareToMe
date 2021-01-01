@@ -1,9 +1,8 @@
 # ShareToMe
 
-# Parsing the information data shared with my application
-
-## 解析分享到我的应用的信息数据 支持 图片 多组图片 明信片 文字
-### android.intent.action.SEND 
+ Parsing the information data shared with my application
+ 解析分享到我的应用的信息数据 支持 图片 多组图片 明信片 文字
+ android.intent.action.SEND 
 
 ```xml
     
@@ -19,13 +18,13 @@
     
 ```
 
-### 解析的全部类型参考AndroidManifest.xml
-### Refer to it for all types of parsing AndroidManifest.xml
+解析的全部类型参考AndroidManifest.xml
+Refer to it for all types of parsing AndroidManifest.xml
 
 
-### 使用很简单
+使用很简单
 
-### 在nCreate 或者 onResume 中执行此方法 分享内容的解析结果就会通接口返回
+在onCreate 或者 onResume 中执行此方法 分享内容的解析结果就会通接口返回
 ```java
 ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.ShareCallBack() {
             /**
@@ -72,13 +71,14 @@ ShareToMe.handleShareToMe(this, getIntent(), new ShareToMe.ShareCallBack() {
 ```
 
     allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
-
-    dependencies {
-	        implementation 'com.github.Dboy233:ShareToMe:3.1.0'
-	}
+    	repositories {
+    		...
+    		maven { url 'https://jitpack.io' }
+    	}
+    }
     
+    dependencies {
+            implementation 'com.github.Dboy233:ShareToMe:3.1.0'
+    }
+
+`ShareVCardData`你使用`getFileBuilder()`方法可将Vcard生成vcf格式文件保存至本地。
